@@ -65,6 +65,13 @@ std::string MkIdaFuncDefScript(uint32_t p, std::string name)
 	return str;
 }
 
+struct MangMGR
+{
+	uint32_t pointer = 0x0;
+	//std::vector<std::string> sufxindi;
+	std::string buf = "";
+	std::string symbol = ""; // out
+};
 void Do()
 {
 	std::string path = "SLUS_215.90";
@@ -74,8 +81,8 @@ void Do()
 	std::cout << "0x" << (void*)fpos << "\n";
 
 	//dbg prt
-	//if (ida_arr_ptr + (sz * 8) == RelativeIda(0x4C1770)) { std::cout << "!IF DBG PRT!!!!!!!!!" << "\n"; return; } // assert
-	//else {std::cout << "assert passed!" << "\n";}
+	if (ida_arr_ptr + (sz * 8) == RelativeIda(0x4C1618)) { std::cout << "!IF DBG PRT!!!!!!!!!" << "\n"; return; } // assert
+	else {std::cout << "assert passed!" << "\n";}
 
 	//std::fstream file(path, std::ios::in | std::ios::binary);
 	std::ifstream file(path, std::ios::binary);
@@ -85,9 +92,8 @@ void Do()
 	//file.seekg(5, std::ios::beg);
 	file.seekg(fpos, std::ios::cur);
 
-	// str ce pointer 0x3BFAF0
-	// end ce pointer 0x3C2618
-	std::vector<std::string> scrvec;
+	// read pointers
+	std::vector<MangMGR> vals;
 	for (size_t i = 0; i < sz; i++)
 	{
 		uint32_t p = 0x0;
@@ -95,18 +101,40 @@ void Do()
 		file.seekg(4, std::ios::cur); // 0x0000FFFF
 		file.read((char*)&p, 4);
 		std::cout << "i: " << i << " " << ToHexString(p) << "\n";
-		if (!p) { continue; } // mb todo add nullsub name
-		std::string name = "COMM_" + std::to_string(i) + "_";
-		name = "CRunningScript::ProcessCommand" + std::to_string(i) + "_";
+
+		// try found ptr in table
+		int index = -1;
+		for (size_t j = 0; j < vals.size(); j++) { if (vals[j].pointer == p) { index = j; break; } }
+
 		//_ZN14CRunningScript18DoDeatharrestCheckEv
-		name = "_ZN14CRunningScript" + std::to_string(16 + std::to_string(i).size()) + "ProcessCommand_" + std::to_string(i) + "_Ev"; // manging
-		std::string op_hex = ToHexString(i);
-		name = "_ZN14CRunningScript" + std::to_string(17 + std::to_string(i).size() + op_hex.size()) + "ProcessCommand_" + std::to_string(i) + "_" + op_hex + "_Ev"; // manging
-		std::string scr = MkIdaFuncDefScript(p, name);
-		scrvec.push_back(scr);
+		if (index >= 0) // found
+		{
+			MangMGR& mgr = vals[index];
+			mgr.buf += std::to_string(i) + "_";
+		}
+		else // new
+		{
+			MangMGR mgr = { 0 };
+			mgr.pointer = p;
+			mgr.buf = "ProcessCommand_" + std::to_string(i) + "_";
+			vals.push_back(mgr);
+		}
 	}
 
+
+	for (size_t i = 0; i < vals.size(); i++) // concat final symbol
+	{
+		vals[i].symbol = "_ZN14CRunningScript" + std::to_string(vals[i].buf.size()) + vals[i].buf + "Ev";
+	}
+
+	// dump
+	std::vector<std::string> scrvec;
+	for (size_t i = 0; i < vals.size(); i++)
+	{
+		scrvec.push_back(MkIdaFuncDefScript(vals[i].pointer, vals[i].symbol)); // define function at pointer
+	}
 	FileWriteAllLines("IDAFIXSCRIPT.TXT", scrvec);
+
 	//if (!file) { std::cerr << "Ошибка чтения данных!" << "\n"; return 1; }
 	file.close();  // Закрываем файл
 }
