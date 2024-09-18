@@ -100,6 +100,8 @@ void Do()
 		name = "CRunningScript::ProcessCommand" + std::to_string(i) + "_";
 		//_ZN14CRunningScript18DoDeatharrestCheckEv
 		name = "_ZN14CRunningScript" + std::to_string(16 + std::to_string(i).size()) + "ProcessCommand_" + std::to_string(i) + "_Ev"; // manging
+		std::string op_hex = ToHexString(i);
+		name = "_ZN14CRunningScript" + std::to_string(17 + std::to_string(i).size() + op_hex.size()) + "ProcessCommand_" + std::to_string(i) + "_" + op_hex + "_Ev"; // manging
 		std::string scr = MkIdaFuncDefScript(p, name);
 		scrvec.push_back(scr);
 	}
