@@ -71,6 +71,7 @@ struct MangMGR
 	//std::vector<std::string> sufxindi;
 	std::string buf = "";
 	std::string symbol = ""; // out
+	bool multiref = false;
 };
 void Do()
 {
@@ -94,6 +95,7 @@ void Do()
 
 	// read pointers
 	std::vector<MangMGR> vals;
+	std::vector<int> missingv;
 	for (size_t i = 0; i < sz; i++)
 	{
 		uint32_t p = 0x0;
@@ -107,18 +109,23 @@ void Do()
 		for (size_t j = 0; j < vals.size(); j++) { if (vals[j].pointer == p) { index = j; break; } }
 
 		//_ZN14CRunningScript18DoDeatharrestCheckEv
-		if (index >= 0) // found
+		if (p)
 		{
-			MangMGR& mgr = vals[index];
-			mgr.buf += std::to_string(i) + "_";
+			if (index >= 0) // found
+			{
+				MangMGR& mgr = vals[index];
+				mgr.buf += std::to_string(i) + "_";
+				mgr.multiref = true;
+			}
+			else // new
+			{
+				MangMGR mgr = { 0 };
+				mgr.pointer = p;
+				mgr.buf = "ProcessCommand_" + std::to_string(i) + "_";
+				vals.push_back(mgr);
+			}
 		}
-		else // new
-		{
-			MangMGR mgr = { 0 };
-			mgr.pointer = p;
-			mgr.buf = "ProcessCommand_" + std::to_string(i) + "_";
-			vals.push_back(mgr);
-		}
+		else { missingv.push_back(i); }
 	}
 
 
@@ -134,6 +141,25 @@ void Do()
 		scrvec.push_back(MkIdaFuncDefScript(vals[i].pointer, vals[i].symbol)); // define function at pointer
 	}
 	FileWriteAllLines("IDAFIXSCRIPT.TXT", scrvec);
+
+	// dump missing comm
+	scrvec.clear();
+	for (size_t i = 0; i < missingv.size(); i++)
+	{
+		//scrvec.push_back("ProcessCommand_" + std::to_string(missingv[i]));
+		scrvec.push_back("COMMAND_SPECIAL_7_" + std::to_string(missingv[i]));
+		//scrvec.push_back(std::to_string(missingv[i]));
+	}
+	FileWriteAllLines("MISSINGH.TXT", scrvec);
+
+	// dump dupl handlers
+	scrvec.clear();
+	for (size_t i = 0; i < vals.size(); i++)
+	{
+		if (vals[i].multiref) { scrvec.push_back(vals[i].buf); }
+	}
+	FileWriteAllLines("DUPLICATEH.TXT", scrvec);
+
 
 	//if (!file) { std::cerr << "Ошибка чтения данных!" << "\n"; return 1; }
 	file.close();  // Закрываем файл

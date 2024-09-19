@@ -68,7 +68,6 @@ add_func(0x365D70, BADADDR);set_name(0x365D70, "_ZN14CRunningScript18ProcessComm
 add_func(0x390848, BADADDR);set_name(0x390848, "_ZN14CRunningScript18ProcessCommand_93_Ev", SN_AUTO);
 add_func(0x3B1ED0, BADADDR);set_name(0x3B1ED0, "_ZN14CRunningScript18ProcessCommand_94_Ev", SN_AUTO);
 add_func(0x3B1F58, BADADDR);set_name(0x3B1F58, "_ZN14CRunningScript18ProcessCommand_95_Ev", SN_AUTO);
-add_func(0x0, BADADDR);set_name(0x0, "_ZN14CRunningScript183ProcessCommand_96_97_98_99_100_101_102_103_104_105_106_107_108_109_110_111_112_113_114_115_116_117_118_119_297_298_299_896_897_898_899_900_901_902_903_904_905_906_907_908_909_910_911_Ev", SN_AUTO);
 add_func(0x3B1FE0, BADADDR);set_name(0x3B1FE0, "_ZN14CRunningScript19ProcessCommand_120_Ev", SN_AUTO);
 add_func(0x3B2048, BADADDR);set_name(0x3B2048, "_ZN14CRunningScript19ProcessCommand_121_Ev", SN_AUTO);
 add_func(0x3B2090, BADADDR);set_name(0x3B2090, "_ZN14CRunningScript19ProcessCommand_122_Ev", SN_AUTO);
