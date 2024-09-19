@@ -147,7 +147,7 @@ void Do()
 	for (size_t i = 0; i < missingv.size(); i++)
 	{
 		//scrvec.push_back("ProcessCommand_" + std::to_string(missingv[i]));
-		scrvec.push_back("COMMAND_SPECIAL_7_" + std::to_string(missingv[i]));
+		scrvec.push_back("COMMAND_SPECIAL_" + std::to_string(missingv[i]));
 		//scrvec.push_back(std::to_string(missingv[i]));
 	}
 	FileWriteAllLines("MISSINGH.TXT", scrvec);
